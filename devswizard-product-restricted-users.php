@@ -77,6 +77,23 @@ function dokan_save_custom_product_fields($product_id)
 add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
 
 
+// Vendor Dashboard Products to Regular sale nav menu renamed 
+function get_dashboard_nav( $menus ) {
+    $custom_menus = [
+        'products' => [
+            'title' => __( 'Regular sale', 'dokan-lite' ),
+            'icon'  => '<i class="fas fa-briefcase"></i>',
+            'url'   => dokan_get_navigation_url( 'products' ),
+            'pos'   => 10,
+        ],
+    ];
+
+    return array_merge( $menus, $custom_menus );
+}
+
+add_filter( 'dokan_get_dashboard_nav', 'get_dashboard_nav' );
+
+
 
 /**
  * Scripts and CSS
