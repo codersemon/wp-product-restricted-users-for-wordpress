@@ -2,7 +2,7 @@
 /*
 Plugin Name: Product Visiblity Control for Users
 Description: It will work as a addons for Dokan plugin. which allow to select user who are able to see and purchase a product. It will works with dokan frontend product upload and edit page.
-Version: 1.0.1
+Version: 1.0.2
 Author: Emon Khan
 Author URI: https://emonkhan.me
 Plugin URI: https://devswizard.com/plugins
@@ -241,6 +241,63 @@ function save_products_custom_data($product_id)
 add_action('dokan_process_product_meta', 'save_products_custom_data');
 
 
+// Display meta field data under product single summary 
+function display_custom_fields_on_product_page() {
+    global $product;
+
+    // Get product ID
+    $product_id = $product->get_id();
+
+    // Get custom field values
+    $brand_name                     = get_post_meta($product_id, 'brand_name', true);
+    $ean_code_cu                    = get_post_meta($product_id, 'ean_code_cu', true);
+    $ean_code_su                    = get_post_meta($product_id, 'ean_code_su', true);
+    $number_of_products_on_pallet   = get_post_meta($product_id, 'number_of_products_on_pallet', true);
+    $number_of_products_on_layer    = get_post_meta($product_id, 'number_of_products_on_layer', true);
+    $recommended_consumer_price     = get_post_meta($product_id, 'recommended_consumer_price', true);
+    $goods_location                 = get_post_meta($product_id, 'goods_location', true);
+    $pick_up_or_delivery_by_seller  = get_post_meta($product_id, 'pick_up_or_delivery_by_seller', true);
+    $timing_of_pick_up_or_delivery  = get_post_meta($product_id, 'timing_of_pick_up_or_delivery', true);
+    $additional_information         = get_post_meta($product_id, 'additional_information', true);
+    $best_before_date_batch         = get_post_meta($product_id, 'best_before_date_batch', true);
+
+    // check before adding currency 
+    if(!empty($recommended_consumer_price)){
+        $recommended_consumer_price = get_woocommerce_currency_symbol() . $recommended_consumer_price;
+    }
+
+    // Display custom fields in a table
+    echo '<div class="custom-fields-section">';
+    echo '<table class="custom-fields-table">';
+
+    // Check and display each field only if the data is available
+    display_table_row('Brand Name', $brand_name);
+    display_table_row('EAN Code (CU)', $ean_code_cu);
+    display_table_row('EAN Code (SU)', $ean_code_su);
+    display_table_row('Number of Products on Pallet', $number_of_products_on_pallet);
+    display_table_row('Number of Products on Layer', $number_of_products_on_layer);
+    display_table_row('Recommended Consumer Price', $recommended_consumer_price);
+    display_table_row('Best Before Date Batch', date('j F, Y', strtotime($best_before_date_batch)));
+    display_table_row('Goods Location', $goods_location);
+    display_table_row('Pick-up or Delivery by Seller', $pick_up_or_delivery_by_seller);
+    display_table_row('Timing of Pick-up or Delivery', date('g:i A', strtotime($timing_of_pick_up_or_delivery)));
+    display_table_row('Additional Information', $additional_information);
+
+    echo '</table>';
+    echo '</div>';
+}
+
+function display_table_row($label, $value) {
+    if (!empty($value)) {
+        echo '<tr>';
+        echo '<td>' . esc_html($label) . ':</td>';
+        echo '<td>' . esc_html($value) . '</td>';
+        echo '</tr>';
+    }
+}
+
+add_action('woocommerce_single_product_summary', 'display_custom_fields_on_product_page', 11);
+
 
 
 /**
@@ -278,7 +335,7 @@ function my_custom_inline_assets()
 
     <script>
         jQuery(document).ready(function($) {
-            // Bind the change event handler
+            // show hide user selector field based on user selection control field value
             $('.user-selection-control').on('change', function() {
                 var selectedValue = $(this).val();
                 if (selectedValue == '1') {
@@ -292,8 +349,15 @@ function my_custom_inline_assets()
             $('.user-selection-control').trigger('change');
 
             $('.user-selection').select2();
+
+            // 	Dokan dashboard product upload page product type selection 
+            $("#product_type option[value=external], #product_type option[value=variable], #product_type option[value=grouped]").remove();
+            $("#product_type option[value=simple]").text('Regular sale');
+            $('label[for="product_type"]').text('Listing type');
         });
     </script>
 <?php
 }
 add_action('wp_head', 'my_custom_inline_assets');
+
+
