@@ -78,20 +78,21 @@ add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
 
 
 // Vendor Dashboard Products to Regular sale nav menu renamed 
-function get_dashboard_nav( $menus ) {
+function get_dashboard_nav($menus)
+{
     $custom_menus = [
         'products' => [
-            'title' => __( 'Regular sale', 'dokan-lite' ),
+            'title' => __('Regular sale', 'dokan-lite'),
             'icon'  => '<i class="fas fa-briefcase"></i>',
-            'url'   => dokan_get_navigation_url( 'products' ),
+            'url'   => dokan_get_navigation_url('products'),
             'pos'   => 10,
         ],
     ];
 
-    return array_merge( $menus, $custom_menus );
+    return array_merge($menus, $custom_menus);
 }
 
-add_filter( 'dokan_get_dashboard_nav', 'get_dashboard_nav' );
+add_filter('dokan_get_dashboard_nav', 'get_dashboard_nav');
 
 
 
@@ -106,6 +107,25 @@ function my_custom_inline_assets()
         label.devswizard-label {
             display: block;
             font-weight: bold;
+        }
+
+        @media all and (min-width: 768px) {
+            ul.dokan-dashboard-menu {
+                display: flex;
+                flex-flow: column wrap;
+            }
+
+            li.auction {
+                order: -7;
+            }
+
+            li.products {
+                order: -8;
+            }
+
+            li.dashboard {
+                order: -9;
+            }
         }
     </style>
 
