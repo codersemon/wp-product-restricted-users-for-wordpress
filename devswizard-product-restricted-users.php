@@ -242,7 +242,8 @@ add_action('dokan_process_product_meta', 'save_products_custom_data');
 
 
 // Display meta field data under product single summary 
-function display_custom_fields_on_product_page() {
+function display_custom_fields_on_product_page()
+{
     global $product;
 
     // Get product ID
@@ -262,7 +263,7 @@ function display_custom_fields_on_product_page() {
     $best_before_date_batch         = get_post_meta($product_id, 'best_before_date_batch', true);
 
     // check before adding currency 
-    if(!empty($recommended_consumer_price)){
+    if (!empty($recommended_consumer_price)) {
         $recommended_consumer_price = get_woocommerce_currency_symbol() . $recommended_consumer_price;
     }
 
@@ -271,23 +272,25 @@ function display_custom_fields_on_product_page() {
     echo '<table class="custom-fields-table">';
 
     // Check and display each field only if the data is available
-    display_table_row('Brand Name', $brand_name);
-    display_table_row('EAN Code (CU)', $ean_code_cu);
-    display_table_row('EAN Code (SU)', $ean_code_su);
-    display_table_row('Number of Products on Pallet', $number_of_products_on_pallet);
-    display_table_row('Number of Products on Layer', $number_of_products_on_layer);
-    display_table_row('Recommended Consumer Price', $recommended_consumer_price);
-    display_table_row('Best Before Date Batch', date('j F, Y', strtotime($best_before_date_batch)));
-    display_table_row('Goods Location', $goods_location);
-    display_table_row('Pick-up or Delivery by Seller', $pick_up_or_delivery_by_seller);
-    display_table_row('Timing of Pick-up or Delivery', date('g:i A', strtotime($timing_of_pick_up_or_delivery)));
-    display_table_row('Additional Information', $additional_information);
+    display_table_row(__('Brand Name', 'dokan-lite'), $brand_name);
+    display_table_row(__('EAN Code (CU)', 'dokan-lite'), $ean_code_cu);
+    display_table_row(__('EAN Code (SU)', 'dokan-lite'), $ean_code_su);
+    display_table_row(__('Number of Products on Pallet', 'dokan-lite'), $number_of_products_on_pallet);
+    display_table_row(__('Number of Products on Layer', 'dokan-lite'), $number_of_products_on_layer);
+    display_table_row(__('Recommended Consumer Price', 'dokan-lite'), $recommended_consumer_price);
+    display_table_row(__('Best Before Date Batch', 'dokan-lite'), date('j F, Y', strtotime($best_before_date_batch)));
+    display_table_row(__('Goods Location', 'dokan-lite'), $goods_location);
+    display_table_row(__('Pick-up or Delivery by Seller', 'dokan-lite'), $pick_up_or_delivery_by_seller);
+    display_table_row(__('Timing of Pick-up or Delivery', 'dokan-lite'), date('g:i A', strtotime($timing_of_pick_up_or_delivery)));
+    display_table_row(__('Additional Information', 'dokan-lite'), $additional_information);
+
 
     echo '</table>';
     echo '</div>';
 }
 
-function display_table_row($label, $value) {
+function display_table_row($label, $value)
+{
     if (!empty($value)) {
         echo '<tr>';
         echo '<td>' . esc_html($label) . ':</td>';
@@ -359,5 +362,3 @@ function my_custom_inline_assets()
 <?php
 }
 add_action('wp_head', 'my_custom_inline_assets');
-
-
