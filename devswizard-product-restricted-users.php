@@ -50,6 +50,7 @@ function dokan_custom_product_fields()
 }
 add_action('dokan_product_edit_after_product_tags', 'dokan_custom_product_fields');
 add_action('dokan_new_product_after_product_tags', 'dokan_custom_product_fields');
+add_action('dokan_auction_before_general_options', 'dokan_custom_product_fields');
 
 // Save custom fields values
 function dokan_save_custom_product_fields($product_id)
@@ -80,6 +81,7 @@ function dokan_save_custom_product_fields($product_id)
     }
 }
 add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
+add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
 
 
 // Vendor Dashboard Products to Regular sale nav menu renamed 
@@ -139,19 +141,19 @@ function products_custom_data()
     // Display number of products on pallet field
     echo '<div class="dokan-form-group">';
     echo '<label for="number_of_products_on_pallet" class="devswizard-label">' . __('Number of Products on Pallet', 'dokan-lite') . '</label>';
-    echo '<input type="text" name="number_of_products_on_pallet" class="dokan-form-control" value="' . esc_attr($number_of_products_on_pallet) . '">';
+    echo '<input type="number" name="number_of_products_on_pallet" class="dokan-form-control" value="' . esc_attr($number_of_products_on_pallet) . '">';
     echo '</div>';
 
     // Display number of products on layer field
     echo '<div class="dokan-form-group">';
     echo '<label for="number_of_products_on_layer" class="devswizard-label">' . __('Number of Products on Layer', 'dokan-lite') . '</label>';
-    echo '<input type="text" name="number_of_products_on_layer" class="dokan-form-control" value="' . esc_attr($number_of_products_on_layer) . '">';
+    echo '<input type="number" name="number_of_products_on_layer" class="dokan-form-control" value="' . esc_attr($number_of_products_on_layer) . '">';
     echo '</div>';
 
     // Display recommended consumer price field
     echo '<div class="dokan-form-group">';
     echo '<label for="recommended_consumer_price" class="devswizard-label">' . __('Recommended Consumer Price', 'dokan-lite') . '</label>';
-    echo '<input type="text" name="recommended_consumer_price" class="dokan-form-control" value="' . esc_attr($recommended_consumer_price) . '">';
+    echo '<input type="number" name="recommended_consumer_price" class="dokan-form-control" value="' . esc_attr($recommended_consumer_price) . '">';
     echo '</div>';
 
     // Display best before date batch field
@@ -189,6 +191,7 @@ function products_custom_data()
 }
 add_action('dokan_product_edit_after_product_tags', 'products_custom_data');
 add_action('dokan_new_product_after_product_tags', 'products_custom_data');
+add_action('dokan_auction_before_general_options', 'products_custom_data');
 
 // Save custom fields values
 function save_products_custom_data($product_id)
@@ -239,6 +242,7 @@ function save_products_custom_data($product_id)
     }
 }
 add_action('dokan_process_product_meta', 'save_products_custom_data');
+add_action('dokan_update_auction_product', 'save_products_custom_data');
 
 
 // Display meta field data under product single summary 
