@@ -68,6 +68,11 @@ function dokan_save_custom_product_fields($product_id)
     // Save 'wpru_users' with an array of selected user IDs
     if (isset($_POST['wpru_users'])) {
         $selected_users = array_map('absint', $_POST['wpru_users']);
+        // Add the current user's ID to the selected users array
+        $current_user_id = get_current_user_id();
+        if (!in_array($current_user_id, $selected_users)) {
+            $selected_users[] = $current_user_id;
+        }
         update_post_meta($product_id, 'wpru_users', $selected_users);
     } else {
         // If no users are selected, make sure 'wpru_users' is not present in the meta
