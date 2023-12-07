@@ -2,7 +2,7 @@
 /*
 Plugin Name: Product Visiblity Control for Users
 Description: It will work as a addons for Dokan plugin. which allow to select user who are able to see and purchase a product. It will works with dokan frontend product upload and edit page.
-Version: 1.0
+Version: 1.0.1
 Author: Emon Khan
 Author URI: https://emonkhan.me
 Plugin URI: https://devswizard.com/plugins
@@ -93,6 +93,148 @@ function get_dashboard_nav($menus)
 }
 
 add_filter('dokan_get_dashboard_nav', 'get_dashboard_nav');
+
+
+
+// Add custom fields to product edit and upload page
+function products_custom_data()
+{
+    global $post;
+
+    $brand_name                     = get_post_meta($post->ID, 'brand_name', true);
+    $ean_code_cu                    = get_post_meta($post->ID, 'ean_code_cu', true);
+    $ean_code_su                    = get_post_meta($post->ID, 'ean_code_su', true);
+    $number_of_products_on_pallet   = get_post_meta($post->ID, 'number_of_products_on_pallet', true);
+    $number_of_products_on_layer    = get_post_meta($post->ID, 'number_of_products_on_layer', true);
+    $recommended_consumer_price     = get_post_meta($post->ID, 'recommended_consumer_price', true);
+    $goods_location                 = get_post_meta($post->ID, 'goods_location', true);
+    $pick_up_or_delivery_by_seller  = get_post_meta($post->ID, 'pick_up_or_delivery_by_seller', true);
+    $timing_of_pick_up_or_delivery  = get_post_meta($post->ID, 'timing_of_pick_up_or_delivery', true);
+    $additional_information         = get_post_meta($post->ID, 'additional_information', true);
+    $best_before_date_batch         = get_post_meta($post->ID, 'best_before_date_batch', true);
+
+    // Display brand name field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="brand_name" class="devswizard-label">' . __('Brand Name', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="brand_name" class="dokan-form-control" value="' . esc_attr($brand_name) . '">';
+    echo '</div>';
+
+    // Display EAN code (CU) field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="ean_code_cu" class="devswizard-label">' . __('EAN Code (CU)', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="ean_code_cu" class="dokan-form-control" value="' . esc_attr($ean_code_cu) . '">';
+    echo '</div>';
+
+    // Display EAN code (SU) field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="ean_code_su" class="devswizard-label">' . __('EAN Code (SU)', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="ean_code_su" class="dokan-form-control" value="' . esc_attr($ean_code_su) . '">';
+    echo '</div>';
+
+    // Display number of products on pallet field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="number_of_products_on_pallet" class="devswizard-label">' . __('Number of Products on Pallet', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="number_of_products_on_pallet" class="dokan-form-control" value="' . esc_attr($number_of_products_on_pallet) . '">';
+    echo '</div>';
+
+    // Display number of products on layer field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="number_of_products_on_layer" class="devswizard-label">' . __('Number of Products on Layer', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="number_of_products_on_layer" class="dokan-form-control" value="' . esc_attr($number_of_products_on_layer) . '">';
+    echo '</div>';
+
+    // Display recommended consumer price field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="recommended_consumer_price" class="devswizard-label">' . __('Recommended Consumer Price', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="recommended_consumer_price" class="dokan-form-control" value="' . esc_attr($recommended_consumer_price) . '">';
+    echo '</div>';
+
+    // Display best before date batch field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="best_before_date_batch" class="devswizard-label">' . __('Best Before Date Batch', 'dokan-lite') . '</label>';
+    echo '<input type="date" name="best_before_date_batch" class="dokan-form-control" value="' . esc_attr($best_before_date_batch) . '">';
+    echo '</div>';
+
+    // Display goods location field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="goods_location" class="devswizard-label">' . __('Goods Location', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="goods_location" class="dokan-form-control" value="' . esc_attr($goods_location) . '">';
+    echo '</div>';
+
+    // Display pick-up or delivery by seller field (select)
+    echo '<div class="dokan-form-group">';
+    echo '<label for="pick_up_or_delivery_by_seller" class="devswizard-label">' . __('Pick-up or Delivery by Seller', 'dokan-lite') . '</label>';
+    echo '<select name="pick_up_or_delivery_by_seller" class="dokan-form-control">';
+    echo '<option value="Pick-up" ' . selected($pick_up_or_delivery_by_seller, 'Pick-up', false) . '>' . __('Pick-up', 'dokan-lite') . '</option>';
+    echo '<option value="Delivery" ' . selected($pick_up_or_delivery_by_seller, 'Delivery', false) . '>' . __('Delivery', 'dokan-lite') . '</option>';
+    echo '</select>';
+    echo '</div>';
+
+    // Display timing of pick-up or delivery field (time input)
+    echo '<div class="dokan-form-group">';
+    echo '<label for="timing_of_pick_up_or_delivery" class="devswizard-label">' . __('Timing of Pick-up or Delivery', 'dokan-lite') . '</label>';
+    echo '<input type="time" name="timing_of_pick_up_or_delivery" class="dokan-form-control" value="' . esc_attr($timing_of_pick_up_or_delivery) . '">';
+    echo '</div>';
+
+    // Display additional information field
+    echo '<div class="dokan-form-group">';
+    echo '<label for="additional_information" class="devswizard-label">' . __('Additional Information', 'dokan-lite') . '</label>';
+    echo '<textarea name="additional_information" class="dokan-form-control">' . esc_textarea($additional_information) . '</textarea>';
+    echo '</div>';
+}
+add_action('dokan_product_edit_after_product_tags', 'products_custom_data');
+add_action('dokan_new_product_after_product_tags', 'products_custom_data');
+
+// Save custom fields values
+function save_products_custom_data($product_id)
+{
+    // Use isset to check if the fields are set in $_POST
+    if (isset($_POST['brand_name'])) {
+        update_post_meta($product_id, 'brand_name', sanitize_text_field($_POST['brand_name']));
+    }
+
+    if (isset($_POST['ean_code_cu'])) {
+        update_post_meta($product_id, 'ean_code_cu', sanitize_text_field($_POST['ean_code_cu']));
+    }
+
+    if (isset($_POST['ean_code_su'])) {
+        update_post_meta($product_id, 'ean_code_su', sanitize_text_field($_POST['ean_code_su']));
+    }
+
+    if (isset($_POST['number_of_products_on_pallet'])) {
+        update_post_meta($product_id, 'number_of_products_on_pallet', sanitize_text_field($_POST['number_of_products_on_pallet']));
+    }
+
+    if (isset($_POST['number_of_products_on_layer'])) {
+        update_post_meta($product_id, 'number_of_products_on_layer', sanitize_text_field($_POST['number_of_products_on_layer']));
+    }
+
+    if (isset($_POST['recommended_consumer_price'])) {
+        update_post_meta($product_id, 'recommended_consumer_price', sanitize_text_field($_POST['recommended_consumer_price']));
+    }
+
+    if (isset($_POST['best_before_date_batch'])) {
+        update_post_meta($product_id, 'best_before_date_batch', sanitize_text_field($_POST['best_before_date_batch']));
+    }
+
+    if (isset($_POST['goods_location'])) {
+        update_post_meta($product_id, 'goods_location', sanitize_text_field($_POST['goods_location']));
+    }
+
+    if (isset($_POST['pick_up_or_delivery_by_seller'])) {
+        update_post_meta($product_id, 'pick_up_or_delivery_by_seller', sanitize_text_field($_POST['pick_up_or_delivery_by_seller']));
+    }
+
+    if (isset($_POST['timing_of_pick_up_or_delivery'])) {
+        update_post_meta($product_id, 'timing_of_pick_up_or_delivery', sanitize_text_field($_POST['timing_of_pick_up_or_delivery']));
+    }
+
+    if (isset($_POST['additional_information'])) {
+        update_post_meta($product_id, 'additional_information', sanitize_textarea_field($_POST['additional_information']));
+    }
+}
+add_action('dokan_process_product_meta', 'save_products_custom_data');
+
 
 
 
