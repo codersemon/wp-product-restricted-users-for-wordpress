@@ -2,7 +2,7 @@
 /*
 Plugin Name: Product Visiblity Control for Users
 Description: It will work as a addons for Dokan plugin. which allow to select user who are able to see and purchase a product. It will works with dokan frontend product upload and edit page.
-Version: 1.0.2
+Version: 1.0.3
 Author: Emon Khan
 Author URI: https://emonkhan.me
 Plugin URI: https://devswizard.com/plugins
@@ -15,7 +15,7 @@ Plugin URI: https://devswizard.com/plugins
 
 
 /**
- * Add custom fields to product edit and upload page
+ * Product visibility meta box
  */
 function dokan_custom_product_fields()
 {
@@ -42,8 +42,10 @@ function dokan_custom_product_fields()
     echo '<label for="wpru_users" class="devswizard-label">' . __('Select Users', 'dokan-lite') . '</label>';
     echo '<select name="wpru_users[]" class="dokan-form-control user-selection" multiple>';
     foreach ($all_users as $user) {
+        $business_name = get_user_meta($user->ID, 'business_name', true);
+        $display_name = !empty($business_name) ? esc_html($business_name) : esc_html($user->display_name);
         $selected = in_array($user->ID, (array) $wpru_users) ? 'selected' : '';
-        echo '<option value="' . esc_attr($user->ID) . '" ' . $selected . '>' . esc_html($user->first_name) . ' (' . esc_html($user->user_email) . ')</option>';
+        echo '<option value="' . esc_attr($user->ID) . '" ' . $selected . '>' . $display_name . '</option>';
     }
     echo '</select>';
     echo '</div>';
@@ -52,7 +54,7 @@ add_action('dokan_product_edit_after_product_tags', 'dokan_custom_product_fields
 add_action('dokan_new_product_after_product_tags', 'dokan_custom_product_fields');
 add_action('dokan_auction_before_general_options', 'dokan_custom_product_fields');
 
-// Save custom fields values
+// Save product visibility meta
 function dokan_save_custom_product_fields($product_id)
 {
     if (isset($_POST['wpru_enable'])) {
@@ -84,22 +86,16 @@ add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
 add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
 
 
-// Vendor Dashboard Products to Regular sale nav menu renamed 
-function get_dashboard_nav($menus)
-{
-    $custom_menus = [
-        'products' => [
-            'title' => __('Regular sale', 'dokan-lite'),
-            'icon'  => '<i class="fas fa-briefcase"></i>',
-            'url'   => dokan_get_navigation_url('products'),
-            'pos'   => 10,
-        ],
-    ];
+/**
+ * Previous workable code end here 
+ */
 
-    return array_merge($menus, $custom_menus);
-}
 
-add_filter('dokan_get_dashboard_nav', 'get_dashboard_nav');
+
+
+
+
+
 
 
 
@@ -119,6 +115,9 @@ function products_custom_data()
     $timing_of_pick_up_or_delivery  = get_post_meta($post->ID, 'timing_of_pick_up_or_delivery', true);
     $additional_information         = get_post_meta($post->ID, 'additional_information', true);
     $best_before_date_batch         = get_post_meta($post->ID, 'best_before_date_batch', true);
+    $language_on_packaging          = get_post_meta($post->ID, 'language_on_packaging', true);
+    $items_case                        = get_post_meta($post->ID, 'items_case', true);
+    $additional_information         = get_post_meta($post->ID, 'additional_information', true);
 
     // Display brand name field
     echo '<div class="dokan-form-group">';
@@ -141,25 +140,25 @@ function products_custom_data()
     // Display number of products on pallet field
     echo '<div class="dokan-form-group">';
     echo '<label for="number_of_products_on_pallet" class="devswizard-label">' . __('Number of Products on Pallet', 'dokan-lite') . '</label>';
-    echo '<input type="number" name="number_of_products_on_pallet" class="dokan-form-control" value="' . esc_attr($number_of_products_on_pallet) . '">';
+    echo '<input type="text" name="number_of_products_on_pallet" class="dokan-form-control" value="' . esc_attr($number_of_products_on_pallet) . '">';
     echo '</div>';
 
     // Display number of products on layer field
     echo '<div class="dokan-form-group">';
     echo '<label for="number_of_products_on_layer" class="devswizard-label">' . __('Number of Products on Layer', 'dokan-lite') . '</label>';
-    echo '<input type="number" name="number_of_products_on_layer" class="dokan-form-control" value="' . esc_attr($number_of_products_on_layer) . '">';
+    echo '<input type="text" name="number_of_products_on_layer" class="dokan-form-control" value="' . esc_attr($number_of_products_on_layer) . '">';
     echo '</div>';
 
     // Display recommended consumer price field
     echo '<div class="dokan-form-group">';
     echo '<label for="recommended_consumer_price" class="devswizard-label">' . __('Recommended Consumer Price', 'dokan-lite') . '</label>';
-    echo '<input type="number" name="recommended_consumer_price" class="dokan-form-control" value="' . esc_attr($recommended_consumer_price) . '">';
+    echo '<input type="text" name="recommended_consumer_price" class="dokan-form-control" value="' . esc_attr($recommended_consumer_price) . '">';
     echo '</div>';
 
-    // Display best before date batch field
+    // Display best before text batch field
     echo '<div class="dokan-form-group">';
     echo '<label for="best_before_date_batch" class="devswizard-label">' . __('Best Before Date Batch', 'dokan-lite') . '</label>';
-    echo '<input type="date" name="best_before_date_batch" class="dokan-form-control" value="' . esc_attr($best_before_date_batch) . '">';
+    echo '<input type="text" name="best_before_date_batch" class="dokan-form-control" value="' . esc_attr($best_before_date_batch) . '">';
     echo '</div>';
 
     // Display goods location field
@@ -180,7 +179,19 @@ function products_custom_data()
     // Display timing of pick-up or delivery field (time input)
     echo '<div class="dokan-form-group">';
     echo '<label for="timing_of_pick_up_or_delivery" class="devswizard-label">' . __('Timing of Pick-up or Delivery', 'dokan-lite') . '</label>';
-    echo '<input type="time" name="timing_of_pick_up_or_delivery" class="dokan-form-control" value="' . esc_attr($timing_of_pick_up_or_delivery) . '">';
+    echo '<input type="date" name="timing_of_pick_up_or_delivery" class="dokan-form-control" value="' . esc_attr($timing_of_pick_up_or_delivery) . '">';
+    echo '</div>';
+
+    // Display language_on_packaging field (text input)
+    echo '<div class="dokan-form-group">';
+    echo '<label for="language_on_packaging" class="devswizard-label">' . __('Language on packaging', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="language_on_packaging" class="dokan-form-control" value="' . esc_attr($language_on_packaging) . '">';
+    echo '</div>';
+
+    // Display items_case field (text input)
+    echo '<div class="dokan-form-group">';
+    echo '<label for="items_case" class="devswizard-label">' . __('Items in case', 'dokan-lite') . '</label>';
+    echo '<input type="text" name="items_case" class="dokan-form-control" value="' . esc_attr($items_case) . '">';
     echo '</div>';
 
     // Display additional information field
@@ -237,6 +248,14 @@ function save_products_custom_data($product_id)
         update_post_meta($product_id, 'timing_of_pick_up_or_delivery', sanitize_text_field($_POST['timing_of_pick_up_or_delivery']));
     }
 
+    if (isset($_POST['language_on_packaging'])) {
+        update_post_meta($product_id, 'language_on_packaging', sanitize_text_field($_POST['language_on_packaging']));
+    }
+
+    if (isset($_POST['items_case'])) {
+        update_post_meta($product_id, 'items_case', sanitize_text_field($_POST['items_case']));
+    }
+
     if (isset($_POST['additional_information'])) {
         update_post_meta($product_id, 'additional_information', sanitize_textarea_field($_POST['additional_information']));
     }
@@ -263,8 +282,11 @@ function display_custom_fields_on_product_page()
     $goods_location                 = get_post_meta($product_id, 'goods_location', true);
     $pick_up_or_delivery_by_seller  = get_post_meta($product_id, 'pick_up_or_delivery_by_seller', true);
     $timing_of_pick_up_or_delivery  = get_post_meta($product_id, 'timing_of_pick_up_or_delivery', true);
+    $language_on_packaging          = get_post_meta($product_id, 'language_on_packaging', true);
+    $items_case                        = get_post_meta($product_id, 'items_case', true);
     $additional_information         = get_post_meta($product_id, 'additional_information', true);
     $best_before_date_batch         = get_post_meta($product_id, 'best_before_date_batch', true);
+
 
     // check before adding currency 
     if (!empty($recommended_consumer_price)) {
@@ -282,10 +304,12 @@ function display_custom_fields_on_product_page()
     display_table_row(__('Number of Products on Pallet', 'dokan-lite'), $number_of_products_on_pallet);
     display_table_row(__('Number of Products on Layer', 'dokan-lite'), $number_of_products_on_layer);
     display_table_row(__('Recommended Consumer Price', 'dokan-lite'), $recommended_consumer_price);
-    display_table_row(__('Best Before Date Batch', 'dokan-lite'), date('j F, Y', strtotime($best_before_date_batch)));
+    display_table_row(__('Best Before Date Batch', 'dokan-lite'), $best_before_date_batch);
     display_table_row(__('Goods Location', 'dokan-lite'), $goods_location);
     display_table_row(__('Pick-up or Delivery by Seller', 'dokan-lite'), $pick_up_or_delivery_by_seller);
-    display_table_row(__('Timing of Pick-up or Delivery', 'dokan-lite'), date('g:i A', strtotime($timing_of_pick_up_or_delivery)));
+    display_table_row(__('Timing of Pick-up or Delivery', 'dokan-lite'), date('F j, Y', strtotime($timing_of_pick_up_or_delivery)));
+    display_table_row(__('Language on packaging', 'dokan-lite'), $language_on_packaging);
+    display_table_row(__('Items in case', 'dokan-lite'), $items_case);
     display_table_row(__('Additional Information', 'dokan-lite'), $additional_information);
 
 
@@ -318,6 +342,10 @@ function my_custom_inline_assets()
         label.devswizard-label {
             display: block;
             font-weight: bold;
+        }
+
+        .select2-container {
+            width: 100% !important;
         }
 
         @media all and (min-width: 768px) {
