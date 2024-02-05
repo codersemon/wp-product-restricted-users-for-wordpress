@@ -2,7 +2,7 @@
 /*
 Plugin Name: Product Visiblity Control for Users
 Description: It will work as a addons for Dokan plugin. which allow to select user who are able to see and purchase a product. It will works with dokan frontend product upload and edit page.
-Version: 1.0.3
+Version: 1.0.4
 Author: Emon Khan
 Author URI: https://emonkhan.me
 Plugin URI: https://devswizard.com/plugins
@@ -15,115 +15,89 @@ Plugin URI: https://devswizard.com/plugins
 
 
 
+ /***
+  * UPDATED CODE START HERE
+  */
 
-
-/**
- * Group selection system added start here
- */
-function dokan_custom_product_fields()
-{
-    global $post;
-
-    $wpru_enable = get_post_meta($post->ID, 'wpru_enable', true);
-    $wpru_users  = get_post_meta($post->ID, 'wpru_users', true);
-
-    // Display additional option based on user meta 'group-for-user'
-    $all_users = get_users();
-    $group_options = array();
-    foreach ($all_users as $user) {
-        $group = get_user_meta($user->ID, 'group-for-user', true);
-        if (!empty($group) && !in_array($group, $group_options)) {
-            $group_options[] = $group;
-        }
-    }
-
-    echo '<div class="dokan-form-group">';
-    echo '<label for="wpru_enable" class="devswizard-label">' . __('Product Visible To User Control', 'dokan-lite') . '</label>';
-    echo '<select name="wpru_enable" class="dokan-form-control user-selection-control">';
-    echo '<option value="1" ' . selected($wpru_enable, '1', false) . '>' . __('Enable', 'dokan-lite') . '</option>';
-    echo '<option value="" ' . selected($wpru_enable, '', false) . '>' . __('Disable', 'dokan-lite') . '</option>';
-    echo '</select>';
-    echo '</div>';
-
-    // Hidden field
-    echo '<input type="hidden" name="wpru_mode" value="view">';
-
-    // Display the user select field
-    echo '<div class="dokan-form-group user-selection-wrap">';
-    echo '<label for="wpru_users" class="devswizard-label">' . __('Select Users or Group', 'dokan-lite') . '</label>';
-    echo '<select name="wpru_users[]" class="dokan-form-control user-selection" multiple>';
-    foreach ($group_options as $group) {
-        $selected = in_array($group, (array) $wpru_users) ? 'selected' : '';
-        echo '<option value="' . esc_attr($group) . '" ' . $selected . '>' . esc_html($group) . '</option>';
-    }
-    foreach ($all_users as $user) {
-        $business_name = get_user_meta($user->ID, 'business_name', true);
-        $display_name = !empty($business_name) ? esc_html($business_name) : esc_html($user->display_name);
-        $selected = in_array($user->ID, (array) $wpru_users) ? 'selected' : '';
-        echo '<option value="' . esc_attr($user->ID) . '" ' . $selected . '>' . $display_name . '</option>';
-    }
-    echo '</select>';
-    echo '</div>';
-}
-add_action('dokan_product_edit_after_product_tags', 'dokan_custom_product_fields');
-add_action('dokan_new_product_after_product_tags', 'dokan_custom_product_fields');
-add_action('dokan_auction_before_general_options', 'dokan_custom_product_fields');
-
-
-
-// Save product visibility meta
-function dokan_save_custom_product_fields($product_id)
-{
-    if (isset($_POST['wpru_enable'])) {
-        update_post_meta($product_id, 'wpru_enable', sanitize_text_field($_POST['wpru_enable']));
-    }
-
-    // Save 'wpru_mode' only when 'wpru_enable' is set to 1
-    if (isset($_POST['wpru_enable']) && $_POST['wpru_enable'] == '1' && isset($_POST['wpru_mode'])) {
-        update_post_meta($product_id, 'wpru_mode', sanitize_text_field($_POST['wpru_mode']));
-    } else {
-        update_post_meta($product_id, 'wpru_mode', '');
-    }
-
-    // Save 'wpru_users' with an array of selected user IDs
-    if (isset($_POST['wpru_users'])) {
-        $selected_users = array_map('absint', $_POST['wpru_users']);
-
-        // Gather user IDs associated with all selected group options
-        $group_users = array();
-        foreach ($_POST['wpru_users'] as $value) {
-            if (!is_numeric($value)) {
-                global $wpdb;
-                $group_users_query = $wpdb->get_col($wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'group-for-user' AND meta_value = %s", $value));
-                $group_users = array_merge($group_users, $group_users_query);
-            }
-        }
-
-        // Merge group users with the selected users
-        $selected_users = array_merge($selected_users, $group_users);
-
-        // Remove duplicates
-        $selected_users = array_unique($selected_users);
-
-        // Add the current user's ID to the selected users array
-        $current_user_id = get_current_user_id();
-        if (!in_array($current_user_id, $selected_users)) {
-            $selected_users[] = $current_user_id;
-        }
-
-        update_post_meta($product_id, 'wpru_users', $selected_users);
-    } else {
-        // If no users are selected, make sure 'wpru_users' is not present in the meta
-        delete_post_meta($product_id, 'wpru_users');
-    }
-}
-add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
-add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
-
-
-/**
- * Group selection system added end here
- */
+  function dokan_custom_product_fields()
+  {
+      global $post;
+  
+      $wpru_enable = get_post_meta($post->ID, 'wpru_enable', true);
+      $selected_groups = get_post_meta($post->ID, 'wpru_groups', true);
+  
+      // Display additional option based on user meta 'group_for_user'
+      $all_users = get_users();
+      $group_options = array();
+      foreach ($all_users as $user) {
+          $group = get_user_meta($user->ID, 'group_for_user', true);
+          if (!empty($group) && !in_array($group, $group_options)) {
+              $group_options[] = $group;
+          }
+      }
+  
+      echo '<div class="dokan-form-group">';
+      echo '<label for="wpru_enable" class="devswizard-label">' . __('Product Visible To User Control', 'dokan-lite') . '</label>';
+      echo '<select name="wpru_enable" class="dokan-form-control user-selection-control">';
+      echo '<option value="1" ' . selected($wpru_enable, '1', false) . '>' . __('Enable', 'dokan-lite') . '</option>';
+      echo '<option value="" ' . selected($wpru_enable, '', false) . '>' . __('Disable', 'dokan-lite') . '</option>';
+      echo '</select>';
+      echo '</div>';
+  
+      // Display the group select field allowing multiple selection
+      echo '<div class="dokan-form-group user-selection-wrap">';
+      echo '<label for="wpru_groups" class="devswizard-label">' . __('Select User Groups', 'dokan-lite') . '</label>';
+      echo '<select name="wpru_groups[]" class="dokan-form-control user-selection" multiple>';
+      foreach ($group_options as $group) {
+          $selected = in_array($group, (array) $selected_groups) ? 'selected' : '';
+          echo '<option value="' . esc_attr($group) . '" ' . $selected . '>' . esc_html($group) . '</option>';
+      }
+      echo '</select>';
+      echo '</div>';
+  }
+  add_action('dokan_product_edit_after_product_tags', 'dokan_custom_product_fields');
+  add_action('dokan_new_product_after_product_tags', 'dokan_custom_product_fields');
+  add_action('dokan_auction_before_general_options', 'dokan_custom_product_fields');
+  
+  // Save product visibility meta
+  function dokan_save_custom_product_fields($product_id)
+  {
+      if (isset($_POST['wpru_enable'])) {
+          update_post_meta($product_id, 'wpru_enable', sanitize_text_field($_POST['wpru_enable']));
+      }
+  
+      // Save selected groups
+      if (isset($_POST['wpru_groups'])) {
+          update_post_meta($product_id, 'wpru_groups', array_map('sanitize_text_field', $_POST['wpru_groups']));
+  
+          // Gather user IDs associated with the selected groups
+          $group_users = array();
+          global $wpdb;
+          foreach ($_POST['wpru_groups'] as $group) {
+              $group_users_query = $wpdb->get_col($wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'group_for_user' AND meta_value = %s", $group));
+              $group_users = array_merge($group_users, $group_users_query);
+          }
+  
+          // Add the current user's ID to the selected users array
+          $current_user_id = get_current_user_id();
+          if (!in_array($current_user_id, $group_users)) {
+              $group_users[] = $current_user_id;
+          }
+  
+          // Save selected users
+          update_post_meta($product_id, 'wpru_users', array_unique($group_users));
+      } else {
+          // If no group is selected, make sure 'wpru_groups' and 'wpru_users' are not present in the meta
+          delete_post_meta($product_id, 'wpru_groups');
+          delete_post_meta($product_id, 'wpru_users');
+      }
+  }
+  add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
+  add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
+  
+  /**
+   * UPDATED CODE END HERE
+   */
 
 
 
