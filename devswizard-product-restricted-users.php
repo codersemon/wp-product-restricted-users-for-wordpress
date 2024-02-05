@@ -14,8 +14,11 @@ Plugin URI: https://devswizard.com/plugins
 // https://wordpress.org/plugins/woo-products-restricted-users/
 
 
+
+
+
 /**
- * Product visibility meta box
+ * Group selection system added start here
  */
 function dokan_custom_product_fields()
 {
@@ -24,7 +27,16 @@ function dokan_custom_product_fields()
     $wpru_enable = get_post_meta($post->ID, 'wpru_enable', true);
     $wpru_users  = get_post_meta($post->ID, 'wpru_users', true);
 
-    // Display visibility enable / disable field 
+    // Display additional option based on user meta 'group-for-user'
+    $all_users = get_users();
+    $group_options = array();
+    foreach ($all_users as $user) {
+        $group = get_user_meta($user->ID, 'group-for-user', true);
+        if (!empty($group) && !in_array($group, $group_options)) {
+            $group_options[] = $group;
+        }
+    }
+
     echo '<div class="dokan-form-group">';
     echo '<label for="wpru_enable" class="devswizard-label">' . __('Product Visible To User Control', 'dokan-lite') . '</label>';
     echo '<select name="wpru_enable" class="dokan-form-control user-selection-control">';
@@ -37,10 +49,13 @@ function dokan_custom_product_fields()
     echo '<input type="hidden" name="wpru_mode" value="view">';
 
     // Display the user select field
-    $all_users = get_users();
     echo '<div class="dokan-form-group user-selection-wrap">';
-    echo '<label for="wpru_users" class="devswizard-label">' . __('Select Users', 'dokan-lite') . '</label>';
+    echo '<label for="wpru_users" class="devswizard-label">' . __('Select Users or Group', 'dokan-lite') . '</label>';
     echo '<select name="wpru_users[]" class="dokan-form-control user-selection" multiple>';
+    foreach ($group_options as $group) {
+        $selected = in_array($group, (array) $wpru_users) ? 'selected' : '';
+        echo '<option value="' . esc_attr($group) . '" ' . $selected . '>' . esc_html($group) . '</option>';
+    }
     foreach ($all_users as $user) {
         $business_name = get_user_meta($user->ID, 'business_name', true);
         $display_name = !empty($business_name) ? esc_html($business_name) : esc_html($user->display_name);
@@ -53,6 +68,8 @@ function dokan_custom_product_fields()
 add_action('dokan_product_edit_after_product_tags', 'dokan_custom_product_fields');
 add_action('dokan_new_product_after_product_tags', 'dokan_custom_product_fields');
 add_action('dokan_auction_before_general_options', 'dokan_custom_product_fields');
+
+
 
 // Save product visibility meta
 function dokan_save_custom_product_fields($product_id)
@@ -71,11 +88,29 @@ function dokan_save_custom_product_fields($product_id)
     // Save 'wpru_users' with an array of selected user IDs
     if (isset($_POST['wpru_users'])) {
         $selected_users = array_map('absint', $_POST['wpru_users']);
+
+        // Gather user IDs associated with all selected group options
+        $group_users = array();
+        foreach ($_POST['wpru_users'] as $value) {
+            if (!is_numeric($value)) {
+                global $wpdb;
+                $group_users_query = $wpdb->get_col($wpdb->prepare("SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'group-for-user' AND meta_value = %s", $value));
+                $group_users = array_merge($group_users, $group_users_query);
+            }
+        }
+
+        // Merge group users with the selected users
+        $selected_users = array_merge($selected_users, $group_users);
+
+        // Remove duplicates
+        $selected_users = array_unique($selected_users);
+
         // Add the current user's ID to the selected users array
         $current_user_id = get_current_user_id();
         if (!in_array($current_user_id, $selected_users)) {
             $selected_users[] = $current_user_id;
         }
+
         update_post_meta($product_id, 'wpru_users', $selected_users);
     } else {
         // If no users are selected, make sure 'wpru_users' is not present in the meta
@@ -87,7 +122,7 @@ add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
 
 
 /**
- * Previous workable code end here 
+ * Group selection system added end here
  */
 
 
