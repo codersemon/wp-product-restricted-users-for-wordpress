@@ -48,6 +48,10 @@ Plugin URI: https://devswizard.com/plugins
       echo '<div class="dokan-form-group user-selection-wrap">';
       echo '<label for="wpru_groups" class="devswizard-label">' . __('Select User Groups', 'dokan-lite') . '</label>';
       echo '<select name="wpru_groups[]" class="dokan-form-control user-selection" multiple>';
+      
+      // Add the "Select All" option
+      echo '<option value="select_all">' . __('Select All', 'dokan-lite') . '</option>';
+  
       foreach ($group_options as $group) {
           $selected = in_array($group, (array) $selected_groups) ? 'selected' : '';
           echo '<option value="' . esc_attr($group) . '" ' . $selected . '>' . esc_html($group) . '</option>';
@@ -95,14 +99,10 @@ Plugin URI: https://devswizard.com/plugins
   add_action('dokan_process_product_meta', 'dokan_save_custom_product_fields');
   add_action('dokan_update_auction_product', 'dokan_save_custom_product_fields');
   
+  
   /**
    * UPDATED CODE END HERE
    */
-
-
-
-
-
 
 
 
@@ -392,7 +392,17 @@ function my_custom_inline_assets()
             // Trigger the change event on page load
             $('.user-selection-control').trigger('change');
 
+            // Select init
             $('.user-selection').select2();
+
+            // Handle Select All option
+            $('.user-selection').on('select2:select', function(e) {
+                if (e.params.data.id === 'select_all') {
+                    $(this).find('option').prop('selected', true);
+                    $(this).trigger('change');
+                }
+            });
+
 
             // 	Dokan dashboard product upload page product type selection 
             $("#product_type option[value=external], #product_type option[value=variable], #product_type option[value=grouped]").remove();
